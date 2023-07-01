@@ -140,7 +140,6 @@ template <class _D3DINTERFACE> CDirect3DDevice9Hook *GetHookDevice( _D3DINTERFAC
 #define IMPL_QUERYINTERFACE()                                                   \
     STDMETHOD(QueryInterface)(THIS_ REFIID riid, void** ppvObj)                 \
 	{																			\
-		__debugbreak();															\
 		XXX; return _DOCALL(QueryInterface, riid, ppvObj);						\
 	}
 
@@ -350,7 +349,6 @@ public:
     STDMETHOD(GetContainer)(THIS_ REFIID riid,void** ppContainer)
 	{
 		//$ TODO: do the call, check riid, and wrap the returned ppContainer
-		__debugbreak();
 		XXX; return _DOCALL(GetContainer, riid, ppContainer);
 	}
     STDMETHOD(GetDesc)(THIS_ D3DSURFACE_DESC *pDesc)
@@ -488,7 +486,6 @@ public:
     STDMETHOD(GetContainer)(THIS_ REFIID riid,void** ppContainer)
 	{
 		//$ TODO: do the call, check riid, and wrap the returned ppContainer
-		__debugbreak();
 		XXX; return _DOCALL(GetContainer, riid, ppContainer);
 	}
 

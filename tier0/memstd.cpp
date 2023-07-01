@@ -163,8 +163,6 @@ public:
 		// Ensure that the constructor has run already. Poorly defined
 		// order of construction can result in the allocator being used
 		// before it is constructed. Which could be bad.
-		if ( !m_heap )
-			__debugbreak();
 		void* pMem = HeapAlloc( m_heap, m_HeapFlags, nSize );
 		if ( pMem )
 		{
@@ -178,7 +176,6 @@ public:
 			// Having PageHeap enabled leads to lots of allocation failures. These
 			// then lead to crashes. In order to avoid confusion about the cause of
 			// these crashes, halt immediately on allocation failures.
-			__debugbreak();
 			InterlockedIncrement( &m_nAllocFailures );
 		}
 
@@ -216,7 +213,6 @@ public:
 				// Having PageHeap enabled leads to lots of allocation failures. These
 				// then lead to crashes. In order to avoid confusion about the cause of
 				// these crashes, halt immediately on allocation failures.
-				__debugbreak();
 				InterlockedIncrement( &m_nAllocFailures );
 			}
 			return pNewMem;
@@ -249,8 +245,8 @@ public:
 	#error
 #endif
 
-	virtual void *RegionAlloc( int region, size_t nSize ) { __debugbreak(); return 0; }
-	virtual void *RegionAlloc( int region, size_t nSize, const char *pFileName, int nLine ) { __debugbreak(); return 0; }
+	virtual void *RegionAlloc( int region, size_t nSize ) { return 0; }
+	virtual void *RegionAlloc( int region, size_t nSize, const char *pFileName, int nLine ) { return 0; }
 
 	// Returns size of a particular allocation
 	// If zero is returned then return the total size of allocated memory.

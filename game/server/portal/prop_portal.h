@@ -12,10 +12,10 @@
 #endif
 
 #include "baseanimating.h"
-#include "PortalSimulation.h"
+#include "../../shared/portal/PortalSimulation.h"
 
 // FIX ME
-#include "portal_shareddefs.h"
+#include "../../shared/portal/portal_shareddefs.h"
 
 static const char *s_pDelayedPlacementContext = "DelayedPlacementContext";
 static const char *s_pTestRestingSurfaceContext = "TestRestingSurfaceContext";
