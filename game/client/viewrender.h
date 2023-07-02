@@ -365,6 +365,9 @@ public:
 	virtual void	Render2DEffectsPreHUD( const CViewSetup &view );
 	virtual void	Render2DEffectsPostHUD( const CViewSetup &view );
 
+	// This stores the current view
+	// For the fuck reason GCC errors cuz it's private....
+ 	CViewSetup		m_CurrentView;
 
 	void			DisableFog( void );
 
@@ -419,6 +422,13 @@ public:
 
 	void			FreezeFrame( float flFreezeTime );
 
+	// Intended for use in the middle of another ViewDrawScene call, this allows stencils to be drawn after opaques but before translucents are drawn in the main view.
+	// why msvc doesn't error when it's private?? Why GCC errors???
+	void			ViewDrawScene_PortalStencil( const CViewSetup &view, ViewCustomVisibility_t *pCustomVisibility );
+	void			Draw3dSkyboxworld_Portal( const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible, ITexture *pRenderTarget = NULL );
+	void			ViewDrawScene( bool bDrew3dSkybox, SkyboxVisibility_t nSkyboxVisible, const CViewSetup &view, int nClearFlags, view_id_t viewID, bool bDrawViewModel = false, int baseDrawFlags = 0, ViewCustomVisibility_t *pCustomVisibility = NULL );
+
+
 	void SetWaterOverlayMaterial( IMaterial *pMaterial )
 	{
 		m_UnderWaterOverlayMaterial.Init( pMaterial );
@@ -429,7 +439,6 @@ private:
 
 	// General draw methods
 	// baseDrawFlags is a combination of DF_ defines. DF_MONITOR is passed into here while drawing a monitor.
-	void			ViewDrawScene( bool bDrew3dSkybox, SkyboxVisibility_t nSkyboxVisible, const CViewSetup &view, int nClearFlags, view_id_t viewID, bool bDrawViewModel = false, int baseDrawFlags = 0, ViewCustomVisibility_t *pCustomVisibility = NULL );
 
 	void			DrawMonitors( const CViewSetup &cameraView );
 
@@ -454,11 +463,6 @@ private:
 
 	virtual void			ViewDrawScene_Intro( const CViewSetup &view, int nClearFlags, const IntroData_t &introData );
 
-#ifdef PORTAL 
-	// Intended for use in the middle of another ViewDrawScene call, this allows stencils to be drawn after opaques but before translucents are drawn in the main view.
-	void			ViewDrawScene_PortalStencil( const CViewSetup &view, ViewCustomVisibility_t *pCustomVisibility );
-	void			Draw3dSkyboxworld_Portal( const CViewSetup &view, int &nClearFlags, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible, ITexture *pRenderTarget = NULL );
-#endif // PORTAL
 
 	// Determines what kind of water we're going to use
 	void			DetermineWaterRenderInfo( const VisibleFogVolumeInfo_t &fogVolumeInfo, WaterRenderInfo_t &info );
@@ -470,9 +474,6 @@ private:
 	void			SetupMain3DView( const CViewSetup &view, int &nClearFlags );
 	void			CleanupMain3DView( const CViewSetup &view );
 
-
-	// This stores the current view
- 	CViewSetup		m_CurrentView;
 
 	// VIS Overrides
 	// Set to true to turn off client side vis ( !!!! rendering will be slow since everything will draw )

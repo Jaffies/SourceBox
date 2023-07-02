@@ -4,7 +4,6 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
 #ifndef C_PORTALGHOSTRENDERABLE_H
 #define C_PORTALGHOSTRENDERABLE_H
 
@@ -13,6 +12,7 @@
 #endif
 
 //#include "iclientrenderable.h"
+class C_Prop_Portal;
 #include "c_baseanimating.h"
 
 class C_PortalGhostRenderable : public C_BaseAnimating//IClientRenderable, public IClientUnknown
@@ -124,5 +124,4 @@ public:
 	virtual C_BaseEntity*			GetBaseEntity() { return NULL; };
 	virtual IClientThinkable*		GetClientThinkable() { return NULL; };
 };
-
 #endif //#ifndef C_PORTALGHOSTRENDERABLE_H

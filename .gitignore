@@ -32,6 +32,7 @@ game/client/*/client.lib
 game/server/*/server.lib
 .DS_Store
 build*/
+hl2mp/
 .cache/
 .ccache/
 waf3*/

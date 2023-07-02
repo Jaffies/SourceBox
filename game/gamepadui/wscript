@@ -43,10 +43,11 @@ def build(bld):
 		'../../public/tier1',
 		'../../vgui2/include',
 		'../../vgui2/controls',
-		'../shared'
+		'../shared',
 	]
 
-	libs = [
+	libs = " ".join([
+		'SDL2',
 		'tier0',
 		'particles',
 		'dmxloader',
@@ -63,7 +64,7 @@ def build(bld):
 		'vtf',
 		'RT',
 		'ZLIB'
-	]
+	])
 
 	install_path = bld.env.PREFIX
 	if bld.env.DEST_OS != 'android':

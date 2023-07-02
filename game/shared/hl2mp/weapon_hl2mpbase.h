@@ -11,17 +11,17 @@
 #endif
 
 #ifdef CLIENT_DLL
-#include "c_hl2mp_player.h"
+#include "hl2mp/c_hl2mp_player.h"
 #undef C_WeaponHL2MPBase
 #else
-#include "hl2mp_player.h"
+#include "hl2mp/hl2mp_player.h"
 
 #endif
 
-#include "cs_weapon_parse.h"
-#include "cs_playeranimstate.h"
+#include "../cstrike/cs_weapon_parse.h"
+#include "../cstrike/cs_playeranimstate.h"
 #include "hl2mp_player_shared.h"
-#include "basecombatweapon_shared.h"
+#include "../basecombatweapon_shared.h"
 
 
 #if defined( CLIENT_DLL )
