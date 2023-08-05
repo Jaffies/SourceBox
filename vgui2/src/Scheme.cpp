@@ -17,6 +17,7 @@
 #include <vgui/ISystem.h>
 #include <vstdlib/IKeyValuesSystem.h>
 #include <vgui/IVGui.h>
+#include "../../game/gamepadui/igamepadui.h"
 
 #include "tier1/utlvector.h"
 #include "tier1/utlrbtree.h"
@@ -88,13 +89,20 @@ public:
 	// Get color data
 	virtual const KeyValues *GetColorData() const;
 
+	virtual KeyValues* GetBaseSettings() { return m_pkvBaseSettings;  }
+
+	virtual KeyValues* GetBorders() { return m_pkvBorders;  }
+	virtual void ReloadBorders();
+	
+	virtual KeyValues* GetData() { return m_pData; }
+
 private:
+	virtual void LoadBorders();
 	const char *LookupSchemeSetting(const char *pchSetting);
 	const char *GetMungedFontName( const char *fontName, const char *scheme, bool proportional);
-	void LoadFonts();
-	void LoadBorders();
 	HFont FindFontInAliasList( const char *fontName );
 	int GetMinimumFontHeightForCurrentLanguage();
+	virtual void LoadFonts();
 
 	char fileName[256];
 	char tag[64];
@@ -146,6 +154,11 @@ public:
 	CSchemeManager();
 	~CSchemeManager();
 
+	virtual void SetTheme(const char* theme);
+	virtual void GetTheme(char* out, int maxlen=MAX_PATH);
+
+	virtual void SaveTheme(const char* filename);
+
 	// loads a scheme from a file
 	// first scheme loaded becomes the default scheme, and all subsequent loaded scheme are derivitives of that
 	// tag is friendly string representing the name of the loaded scheme
@@ -162,6 +175,7 @@ public:
 
 	// returns a handle to the scheme identified by "tag"
 	virtual HScheme GetScheme(const char *tag);
+	HScheme GetSchemeNoDefault(const char *tag);
 
 	// returns a pointer to an image
 	virtual IImage *GetImage(const char *imageName, bool hardwareFiltered);
@@ -200,11 +214,14 @@ private:
 
 	CUtlVector<CScheme *> m_Schemes;
 
+	char s_pszTheme[MAX_PATH];
+
 	static const char *s_pszSearchString;
 	struct CachedBitmapHandle_t
 	{
 		Bitmap *pBitmap;
 	};
+	KeyValues* m_pkTheme;
 	static bool BitmapHandleSearchFunc(const CachedBitmapHandle_t &, const CachedBitmapHandle_t &);
 	CUtlRBTree<CachedBitmapHandle_t, int> m_Bitmaps;
 };
@@ -306,6 +323,32 @@ IScheme *CSchemeManager::GetIScheme( HScheme scheme )
 	}
 }
 
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CSchemeManager::SetTheme(const char* theme)
+{
+	strncpy(s_pszTheme, theme, MAX_PATH);
+	if (m_pkTheme)
+	{
+		m_pkTheme->deleteThis();
+	}
+	m_pkTheme = new KeyValues("Theme");
+	m_pkTheme->UsesEscapeSequences(true);
+	m_pkTheme->LoadFromFile(g_pFullFileSystem, s_pszTheme);
+	ReloadSchemes();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CSchemeManager::GetTheme(char* out, int maxlen)
+{
+	strncpy(out, s_pszTheme, MAX_PATH);
+}
+
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -339,6 +382,7 @@ HScheme CSchemeManager::FindLoadedScheme(const char *fileName)
 	return 0;
 }
 
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -362,41 +406,50 @@ CScheme::CScheme()
 // first scheme loaded becomes the default scheme, and all subsequent loaded scheme are derivitives of that
 HScheme  CSchemeManager::LoadSchemeFromFileEx( VPANEL sizingPanel, const char *fileName, const char *tag)
 {
-	// Look to see if we've already got this scheme...
-	HScheme hScheme = FindLoadedScheme(fileName);
-	if (hScheme != 0)
-	{
-		CScheme *pScheme = static_cast< CScheme * >( GetIScheme( hScheme ) );
-		if ( IsPC() && pScheme )
+	KeyValues* data;
+	char name[MAX_PATH];
+	strncpy(name, fileName, MAX_PATH);
+	V_strrepchr(name, '/', '|')
+	data = m_pkTheme->FindKey(name);
+
+	bool ignore_tag = false;
+
+	if (!data)
+	{	
+		HScheme hScheme = FindLoadedScheme(fileName);
+		if (hScheme != 0)
 		{
-			pScheme->ReloadFontGlyphs();
+			CScheme* pScheme = static_cast<CScheme*>(GetIScheme(hScheme));
+			if (IsPC() && pScheme)
+			{
+				pScheme->ReloadFontGlyphs();
+			}
+			//GamepadUI_Log("Found loaded scheme: %s; ID: %u\n", fileName, hScheme);
+			return hScheme;
 		}
-		return hScheme;
-	}
+		data = new KeyValues("Scheme");
 
-	KeyValues *data;
-	data = new KeyValues("Scheme");
+		data->UsesEscapeSequences(true);
 
-	data->UsesEscapeSequences( true );	// VGUI uses this
-	
-	// Look first in game directory
-	bool result = data->LoadFromFile( g_pFullFileSystem, fileName, "GAME" );
-	if ( !result )
-	{
-		// look in any directory
-		result = data->LoadFromFile( g_pFullFileSystem, fileName, NULL );
-	}
-
-	if (!result)
-	{
-		data->deleteThis();
-		return 0;
+		bool result = data->LoadFromFile(g_pFullFileSystem, fileName, "GAME");
+		if (!result) // Not found
+		{
+			result = data->LoadFromFile(g_pFullFileSystem, fileName);
+			if (!result) {
+				data->deleteThis();
+				return 0;
+			}
+			//GamepadUI_Log("Loaded original scheme: %s; ID: %u\n", fileName, hScheme);
+		}
+		//else
+			//GamepadUI_Log("Loaded overriden scheme: %s; ID: %u\n", fileName, hScheme);
+		//ignore_tag = true;
 	}
 	
-	if ( IsX360() )
-	{
-		data->ProcessResolutionKeys( g_pSurface->GetResolutionKey() );
-	}
+	//if ( IsX360() )
+	//{
+	//	data->ProcessResolutionKeys( g_pSurface->GetResolutionKey() );
+	//}
 	if ( IsPC() )
 	{
 		ConVarRef cl_hud_minmode( "cl_hud_minmode", true );
@@ -409,11 +462,21 @@ HScheme  CSchemeManager::LoadSchemeFromFileEx( VPANEL sizingPanel, const char *f
 	{
 		data->ProcessResolutionKeys( "_vrmode" );
 	}
-
-	CScheme *newScheme = new CScheme();
-	newScheme->LoadFromFile( sizingPanel, fileName, tag, data );
-
-	return m_Schemes.AddToTail(newScheme);
+	HScheme hScheme = /*ignore_tag ? 0 : */GetSchemeNoDefault(tag);
+	if (hScheme != 0)
+	{
+		CScheme* pScheme = static_cast<CScheme*>(GetIScheme(hScheme));
+		pScheme->Shutdown(false);
+		pScheme->LoadFromFile(sizingPanel, fileName, tag, data);
+		return hScheme;
+	}
+	else
+	{
+		CScheme* newScheme = new CScheme();
+		newScheme->LoadFromFile(sizingPanel, fileName, tag, data);
+		//GamepadUI_Log("Adding new scheme: %s\n", fileName);
+		return m_Schemes.AddToTail(newScheme);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -674,6 +737,7 @@ void CScheme::SetFontRange( const char *fontname, int nMin, int nMax )
 //-----------------------------------------------------------------------------
 void CScheme::LoadFonts()
 {
+	m_FontAliases.RemoveAll();
 	bool bValid = false;
 	char language[64];
 	memset( language, 0, sizeof( language ) );
@@ -958,11 +1022,82 @@ void CScheme::ReloadFontGlyphs()
 	COM_TimestampedLog( "ReloadFontGlyphs(): End" );
 }
 
+
+void CScheme::ReloadBorders()
+{
+	m_BorderList.RemoveAll();
+	{for (KeyValues* kv = m_pkvBorders->GetFirstSubKey(); kv != NULL; kv = kv->GetNextKey())
+	{
+		if (kv->GetDataType() == KeyValues::TYPE_STRING)
+		{
+			// it's referencing another border, ignore for now
+		}
+		else
+		{
+			int i = m_BorderList.AddToTail();
+
+			IBorder* border = NULL;
+			const char* pszBorderType = kv->GetString("bordertype", NULL);
+			if (pszBorderType && pszBorderType[0])
+			{
+				if (!stricmp(pszBorderType, "image"))
+				{
+					border = new ImageBorder();
+				}
+				else if (!stricmp(pszBorderType, "scalable_image"))
+				{
+					border = new ScalableImageBorder();
+				}
+				else
+				{
+					Assert(0);
+					// Fall back to the base border type. See below.
+					pszBorderType = NULL;
+				}
+			}
+
+			if (!pszBorderType || !pszBorderType[0])
+			{
+				border = new Border();
+			}
+
+			border->SetName(kv->GetName());
+			border->ApplySchemeSettings(this, kv);
+
+			m_BorderList[i].border = border;
+			m_BorderList[i].bSharedBorder = false;
+			m_BorderList[i].borderSymbol = kv->GetNameSymbol();
+		}
+	}}
+
+	// iterate again to get the border references
+	for (KeyValues* kv = m_pkvBorders->GetFirstSubKey(); kv != NULL; kv = kv->GetNextKey())
+	{
+		if (kv->GetDataType() == KeyValues::TYPE_STRING)
+		{
+			// it's referencing another border, find it
+			Border* border = (Border*)GetBorder(kv->GetString());
+			//			const char *str = kv->GetName();
+			Assert(border);
+
+			// add an entry that just references the existing border
+			int i = m_BorderList.AddToTail();
+			m_BorderList[i].border = border;
+			m_BorderList[i].bSharedBorder = true;
+			m_BorderList[i].borderSymbol = kv->GetNameSymbol();
+		}
+	}
+
+	m_pBaseBorder = GetBorder("BaseBorder");
+}
+
+
 //-----------------------------------------------------------------------------
 // Purpose: create the Border objects from the scheme data
 //-----------------------------------------------------------------------------
 void CScheme::LoadBorders()
 {
+	m_BorderList.RemoveAll();
 	m_pkvBorders = m_pData->FindKey("Borders", true);
 	{for ( KeyValues *kv = m_pkvBorders->GetFirstSubKey(); kv != NULL; kv = kv->GetNextKey())
 	{
@@ -1053,6 +1188,22 @@ void CScheme::SpewFonts( void )
 	}
 }
 
+void CSchemeManager::SaveTheme(const char* filename)
+{
+	int count = m_Schemes.Count();
+	KeyValues* theme = new KeyValues("Theme");
+	for (int i = 1; i < count; i++)
+	{
+		KeyValues* scheme = m_Schemes[i]->GetData()->MakeCopy();
+		char name[MAX_PATH];
+		strncpy(name, m_Schemes[i]->GetFileName(), MAX_PATH);
+		V_strrepchr(name, '/', '|')
+		scheme->SetName(name);
+		theme->AddSubKey(scheme);
+	}
+	theme->SaveToFile(g_pFullFileSystem, filename);
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: reloads the scheme from the file
 //-----------------------------------------------------------------------------
@@ -1116,6 +1267,21 @@ HScheme CSchemeManager::GetScheme(const char *tag)
 		}
 	}
 	return 1; // default scheme
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: returns a handle to the scheme identified by "tag"
+//-----------------------------------------------------------------------------
+HScheme CSchemeManager::GetSchemeNoDefault(const char* tag)
+{
+	for (int i = 1; i < m_Schemes.Count(); i++)
+	{
+		if (!stricmp(tag, m_Schemes[i]->GetName()))
+		{
+			return i;
+		}
+	}
+	return 0; // default scheme
 }
 
 int CSchemeManager::GetProportionalScaledValue_( int rootWide, int rootTall, int normalizedValue )

@@ -1453,6 +1453,7 @@ void CMatSystemSurface::DrawOutlinedCircle(int x, int y, int radius, int segment
 }
 
 
+
 //-----------------------------------------------------------------------------
 // Loads a particular texture (material)
 //-----------------------------------------------------------------------------
@@ -3088,7 +3089,7 @@ void CMatSystemSurface::InternalThinkTraverse(VPANEL panel)
 //-----------------------------------------------------------------------------
 // Purpose: recurses the panels giving them a chance to do apply settings,
 //-----------------------------------------------------------------------------
-void CMatSystemSurface::InternalSchemeSettingsTraverse(VPANEL panel, bool forceApplySchemeSettings)
+void CMatSystemSurface::InternalSchemeSettingsTraverse(VPANEL panel, bool forceApplySchemeSettings, bool forcePerformApplyScheme)
 {
 	VPanel * RESTRICT vp = (VPanel *)panel;
 
@@ -3103,24 +3104,27 @@ void CMatSystemSurface::InternalSchemeSettingsTraverse(VPANEL panel, bool forceA
 		VPanel *child = children[ i ];
 		if ( forceApplySchemeSettings || child->IsVisible() )
 		{	
-			InternalSchemeSettingsTraverse((VPANEL)child, forceApplySchemeSettings);
+			InternalSchemeSettingsTraverse((VPANEL)child, forceApplySchemeSettings, forcePerformApplyScheme);
 		}
 	}
 	// and then the parent
+	if (forcePerformApplyScheme)
+	{
+		vp->Client()->GetPanel()->_flags.SetFlag(0x0100);
+	}
 	vp->Client()->PerformApplySchemeSettings();
-
 	vp->TraverseLevel( -1 );
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Walks through the panel tree calling Solve() on them all, in order
 //-----------------------------------------------------------------------------
-void CMatSystemSurface::SolveTraverse(VPANEL panel, bool forceApplySchemeSettings)
+void CMatSystemSurface::SolveTraverse(VPANEL panel, bool forceApplySchemeSettings, bool forcePerformApplyScheme)
 {
 	{
 		VPROF( "InternalSchemeSettingsTraverse" );
 		tmZone( TELEMETRY_LEVEL1, TMZF_NONE, "%s - InternalSchemeSettingsTraverse", __FUNCTION__ );
-		InternalSchemeSettingsTraverse(panel, forceApplySchemeSettings);
+		InternalSchemeSettingsTraverse(panel, forceApplySchemeSettings, forcePerformApplyScheme);
 	}
 
 	{

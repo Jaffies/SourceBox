@@ -166,13 +166,7 @@ bool Flashlight_UseLegacyVersion( void )
 	// If this is the first run through, cache off what the answer should be (cannot change during a session)
 	if ( g_bCacheLegacyFlashlightStatus )
 	{
-		char modDir[MAX_PATH];
-		if ( UTIL_GetModDir( modDir, sizeof(modDir) ) == false )
-			return false;
-
-		g_bUseLegacyFlashlight = ( !Q_strcmp( modDir, "hl2" ) ||
-					   !Q_strcmp( modDir, "episodic" ) ||
-					   !Q_strcmp( modDir, "lostcoast" ) || !Q_strcmp( modDir, "hl1" ));
+		g_bUseLegacyFlashlight = false;
 
 		g_bCacheLegacyFlashlightStatus = false;
 	}
@@ -605,6 +599,7 @@ void CHL2_Player::PreThink(void)
 
 	// This is an experiment of mine- autojumping! 
 	// only affects you if sv_autojump is nonzero.
+	/*
 	if( (GetFlags() & FL_ONGROUND) && sv_autojump.GetFloat() != 0 )
 	{
 		VPROF( "CHL2_Player::PreThink-Autojump" );
@@ -644,7 +639,8 @@ void CHL2_Player::PreThink(void)
 				}
 			}
 		}
-	}
+		
+	}*/
 
 	VPROF_SCOPE_BEGIN( "CHL2_Player::PreThink-Speed" );
 	HandleSpeedChanges();
@@ -3112,8 +3108,8 @@ bool CHL2_Player::Weapon_CanSwitchTo( CBaseCombatWeapon *pWeapon )
 	if (pVehicle && !pPlayer->UsingStandardWeaponsInVehicle())
 		return false;
 
-	if ( !pWeapon->HasAnyAmmo() && !GetAmmoCount( pWeapon->m_iPrimaryAmmoType ) )
-		return false;
+	//if ( !pWeapon->HasAnyAmmo() && !GetAmmoCount( pWeapon->m_iPrimaryAmmoType ) )
+	//	return false;
 
 	if ( !pWeapon->CanDeploy() )
 		return false;

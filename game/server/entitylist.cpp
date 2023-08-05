@@ -499,6 +499,34 @@ CBaseEntity *CGlobalEntityList::FindEntityByClassname( CBaseEntity *pStartEntity
 	return NULL;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Finds a random entity with the given classname.
+// Input  : pStartEntity - Last entity found, NULL to start a new iteration.
+//			szName - Classname to search for.
+//-----------------------------------------------------------------------------
+CBaseEntity* CGlobalEntityList::FindEntityByClassnameRandom(CBaseEntity* pStartEntity, const char* szName)
+{
+	CUtlVector<CBaseEntity*> indexlist;
+	const CEntInfo* pInfo = pStartEntity ? GetEntInfoPtr(pStartEntity->GetRefEHandle())->m_pNext : FirstEntInfo();
+	
+	for (; pInfo; pInfo = pInfo->m_pNext)
+	{
+		CBaseEntity* pEntity = (CBaseEntity*)pInfo->m_pEntity;
+		if (!pEntity)
+		{
+			DevWarning("NULL entity in global entity list!\n");
+			continue;
+		}
+
+		if (pEntity->ClassMatches(szName))
+			indexlist.AddToTail(pEntity);
+	}
+	if (indexlist.Count() != 0) {
+		return indexlist[RandomInt(0, indexlist.Count() - 1)];
+	}
+	return NULL;
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Finds an entity given a procedural name.
@@ -521,7 +549,14 @@ CBaseEntity *CGlobalEntityList::FindEntityProcedural( const char *szName, CBaseE
 		//
 		if ( FStrEq( pName, "player" ) )
 		{
-			return pSearchingEntity;
+			if (pSearchingEntity)
+			{
+				return FindEntityGenericNearest("player", pSearchingEntity->GetAbsOrigin(), 0, pSearchingEntity, pActivator, pCaller);
+			}
+			else
+			{
+				return (CBaseEntity*)UTIL_PlayerByIndex( 1 );
+			}
 		}
 		else if ( FStrEq( pName, "pvsplayer" ) )
 		{
