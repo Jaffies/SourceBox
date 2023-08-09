@@ -892,14 +892,12 @@ void CGameClient::ActivatePlayer( void )
 	COM_TimestampedLog( "CGameClient::ActivatePlayer -start" );
 
 	// call the spawn function
-	if ( !sv.m_bLoadgame )
-	{
-		g_ServerGlobalVariables.curtime = sv.GetTime();
+	
+	g_ServerGlobalVariables.curtime = sv.GetTime();
 
-		COM_TimestampedLog( "g_pServerPluginHandler->ClientPutInServer" );
+	COM_TimestampedLog( "g_pServerPluginHandler->ClientPutInServer" );
 
-		g_pServerPluginHandler->ClientPutInServer( edict, m_Name );
-	}
+	g_pServerPluginHandler->ClientPutInServer( edict, m_Name );	
 
     COM_TimestampedLog( "g_pServerPluginHandler->ClientActive" );
 
@@ -984,6 +982,7 @@ bool CGameClient::SendSignonData( void )
 
 void CGameClient::SpawnPlayer( void )
 {
+	
 	// run the entrance script
 	if ( sv.m_bLoadgame )
 	{	// loaded games are fully inited already
@@ -992,10 +991,13 @@ void CGameClient::SpawnPlayer( void )
 	}
 	else
 	{
-		// set up the edict
-		Assert( serverGameEnts );
-		serverGameEnts->FreeContainingEntity( edict );
-		InitializeEntityDLLFields( edict );
+		if (g_ServerGlobalVariables.eLoadType != MapLoad_Transition || !g_ServerGlobalVariables.startspot)
+		{
+			// set up the edict
+			Assert(serverGameEnts);
+			serverGameEnts->FreeContainingEntity(edict);
+			InitializeEntityDLLFields(edict);
+		}
 		
 	}
 
@@ -1008,7 +1010,7 @@ void CGameClient::SpawnPlayer( void )
 	SendNetMsg( setView );
 
 	
-
+	
 	CBaseClient::SpawnPlayer();
 
 	// notify that the player is spawning
@@ -1113,6 +1115,8 @@ bool CGameClient::SendNetMsg(INetMessage &msg, bool bForceReliable)
 	return CBaseClient::SendNetMsg( msg, bForceReliable);
 }
 
+
+
 bool CGameClient::ExecuteStringCommand( const char *pCommandString )
 {
 	// first let the baseclass handle it
@@ -1159,8 +1163,11 @@ bool CGameClient::ExecuteStringCommand( const char *pCommandString )
 		}
 
 		g_pServerPluginHandler->SetCommandClient( m_nClientSlot );
-		Msg("[%s]: %s\n", m_Name, args.GetCommandString());
-		Cmd_Dispatch( pCommand, args );
+		if (sv.FilterCommand(args.GetCommandString()))
+		{
+			Msg("[%s]: %s\n", m_Name, args.GetCommandString());
+			Cmd_Dispatch(pCommand, args);
+		}
 	}
 	else
 	{

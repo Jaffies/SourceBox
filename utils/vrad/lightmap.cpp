@@ -11,7 +11,6 @@
 #include "radial.h"
 #include "mathlib/bumpvects.h"
 #include "tier1/utlvector.h"
-#include "vmpi.h"
 #include "mathlib/anorms.h"
 #include "map_utils.h"
 #include "mathlib/halton.h"
@@ -1128,7 +1127,7 @@ static void ParseLightGeneric( entity_t *e, directlight_t *dl )
 	Vector	        dest;
 
 	dl->light.style = (int)FloatForKey (e, "style");
-	
+	//printf("floatforkey: %i\n", dl->light.style);
 	// get intenfsity
 	if( g_bHDR && LightForKey( e, "_lightHDR", dl->light.intensity ) ) 
 	{
@@ -1510,6 +1509,7 @@ static void ParseLightEnvironment( entity_t* e, directlight_t* dl )
 						 FloatForKeyWithDefault( e, "_AmbientScaleHDR", 1.0 ), 
 						 gAmbient->light.intensity );
 		}
+		//printf("===== %f %f %f\n", gAmbient->m_flCapDist, gAmbient->m_flStartFadeDistance, gAmbient->m_flEndFadeDistance);
 		
 		BuildVisForLightEnvironment();
  
@@ -3174,13 +3174,7 @@ void BuildFacelights (int iThread, int facenum)
 		}
 	}
 
-	if (!g_bUseMPI) 
-	{
-		//
-		// This is done on the master node when MPI is used
-		//
-		BuildPatchLights( facenum );
-	}
+	BuildPatchLights( facenum );
 
 	if( g_bDumpPatches )
 	{

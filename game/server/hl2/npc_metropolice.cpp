@@ -18,7 +18,7 @@
 #include "hl2_player.h"
 #include "iservervehicle.h"
 #include "items.h"
-#include "hl2_gamerules.h"
+#include "hl2mp_gamerules.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -2875,7 +2875,7 @@ void CNPC_MetroPolice::OnAnimEventShove( void )
 //-----------------------------------------------------------------------------
 void CNPC_MetroPolice::OnAnimEventBatonOn( void )
 {
-#ifndef HL2MP
+
 
 	CWeaponStunStick *pStick = dynamic_cast<CWeaponStunStick *>(GetActiveWeapon());
 
@@ -2883,7 +2883,7 @@ void CNPC_MetroPolice::OnAnimEventBatonOn( void )
 	{
 		pStick->SetStunState( true );
 	}
-#endif
+
 
 }
 
@@ -2892,7 +2892,7 @@ void CNPC_MetroPolice::OnAnimEventBatonOn( void )
 //-----------------------------------------------------------------------------
 void CNPC_MetroPolice::OnAnimEventBatonOff( void )
 {
-#ifndef HL2MP
+
 
 	CWeaponStunStick *pStick = dynamic_cast<CWeaponStunStick *>(GetActiveWeapon());
 	
@@ -2900,7 +2900,7 @@ void CNPC_MetroPolice::OnAnimEventBatonOff( void )
 	{
 		pStick->SetStunState( false );
 	}
-#endif
+
 }
 
 //-----------------------------------------------------------------------------
@@ -3093,7 +3093,7 @@ void CNPC_MetroPolice::Event_Killed( const CTakeDamageInfo &info )
 
 	if ( pPlayer != NULL )
 	{
-		CHalfLife2 *pHL2GameRules = static_cast<CHalfLife2 *>(g_pGameRules);
+		CHL2MPRules*pHL2GameRules = static_cast<CHL2MPRules*>(g_pGameRules);
 
 		// Attempt to drop health
 		if ( pHL2GameRules->NPC_ShouldDropHealth( pPlayer ) )
@@ -5043,13 +5043,11 @@ bool CNPC_MetroPolice::HasBaton( void )
 //-----------------------------------------------------------------------------
 bool CNPC_MetroPolice::BatonActive( void )
 {
-#ifndef HL2MP
 
 	CWeaponStunStick *pStick = dynamic_cast<CWeaponStunStick *>(GetActiveWeapon());
 
 	if ( pStick )
 		return pStick->GetStunState();
-#endif
 
 	return false;
 }

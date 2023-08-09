@@ -98,7 +98,7 @@ void Cmd_AddClientCmdCanExecuteVar( const char *pName )
 // These functions manage a list of execution markers that we use to verify
 // special commands in the command buffer.
 //=============================================================================
-
+static ConVar cmd_maxcommandchain("cmd_maxcommandchain", "128", FCVAR_ARCHIVE, "Set the maximum command chain length, will delay infinite recursions to the next tick. (Default: 128)", true, 1, true, 1024);
 static CUtlVector<int> g_ExecutionMarkers;
 static CUniformRandomStream g_ExecutionMarkerStream;
 static bool g_bExecutionMarkerStreamInitialized = false;
@@ -416,9 +416,14 @@ void Cbuf_Execute()
 	// be the the number of times Cbuf_Execute is called.
 	LockOutputFunc(true);
 	s_CommandBuffer.BeginProcessingCommands( 1 );
-	while ( s_CommandBuffer.DequeueNextCommand( ) )
+	int i = 0;
+	for (; i < cmd_maxcommandchain.GetInt() && s_CommandBuffer.DequeueNextCommand( ); i++ )
 	{
 		Cbuf_ExecuteCommand( s_CommandBuffer.GetCommand(), src_command, s_CommandBuffer.m_nOutputBuffer );
+	}
+	if (i == cmd_maxcommandchain.GetInt())
+	{
+		s_CommandBuffer.FindClear();
 	}
 	s_CommandBuffer.EndProcessingCommands( );
 	LockOutputFunc(false);
@@ -465,6 +470,15 @@ static char const *Cmd_TranslateFileAssociation(char const *param )
 
 	// return null if no translation, otherwise return commands
 	return retval;
+}
+
+CON_COMMAND(cmd_printcommandbuffer, "Prints the command buffer")
+{
+	s_CommandBuffer.PrintCommandBuffer();
+}
+CON_COMMAND(cmd_clearcommandbuffer, "Clears the command buffer on the next dequeue")
+{
+	s_CommandBuffer.ClearCommandBuffer();
 }
 
 //-----------------------------------------------------------------------------
@@ -677,6 +691,7 @@ void Cmd_Exec_f( const CCommand &args )
 				break;
 			}
 		}
+
 	}
 
 	if ( f != buf )
@@ -1098,10 +1113,9 @@ const ConCommandBase *Cmd_ExecuteCommand( const CCommand &command, cmd_source_t 
 				Cmd_Dispatch(pCommand, command);
 				CompletelyLockOutputFunc(false);
 				SpewOutputFunc(Sys_SpewFunc);
-
-				
 			}
-			else {
+			else 
+			{
 				SpewOutputFunc(Sys_SpewFunc);
 				Cmd_Dispatch(pCommand, command);
 			}

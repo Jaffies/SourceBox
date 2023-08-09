@@ -45,7 +45,7 @@
 
 #ifdef HL2_DLL
 #include "weapon_physcannon.h"
-#include "hl2_gamerules.h"
+#include "hl2mp_gamerules.h"
 #endif
 
 #ifdef PORTAL
@@ -1534,7 +1534,7 @@ bool CBaseCombatCharacter::BecomeRagdoll( const CTakeDamageInfo &info, const Vec
 
 #ifdef HL2_EPISODIC
 	// Burning corpses are server-side in episodic, if we're in darkness mode
-	if ( IsOnFire() && HL2GameRules()->IsAlyxInDarknessMode() )
+	if ( IsOnFire() && HL2MPRules()->IsAlyxInDarknessMode() )
 	{
 		CBaseEntity *pRagdoll = CreateServerRagdoll( this, m_nForceBone, newinfo, COLLISION_GROUP_DEBRIS );
 		FixupBurningServerRagdoll( pRagdoll );
@@ -1547,7 +1547,7 @@ bool CBaseCombatCharacter::BecomeRagdoll( const CTakeDamageInfo &info, const Vec
 
 	bool bMegaPhyscannonActive = false;
 #if !defined( HL2MP )
-	bMegaPhyscannonActive = HL2GameRules()->MegaPhyscannonActive();
+	bMegaPhyscannonActive = HL2MPRules()->MegaPhyscannonActive();
 #endif // !HL2MP
 
 	// Mega physgun requires everything to be a server-side ragdoll
@@ -2073,6 +2073,10 @@ void CBaseCombatCharacter::SetLightingOriginRelative( CBaseEntity *pLightingOrig
 //-----------------------------------------------------------------------------
 void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 {
+
+	int pos = Weapon_GetLastPositionInSlot(pWeapon->GetSlot());
+	pWeapon->m_iActualPosition.Set(pos);
+
 	// Add the weapon to my weapon inventory
 	for (int i=0;i<MAX_WEAPONS;i++) 
 	{
@@ -2082,6 +2086,8 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 			break;
 		}
 	}
+	
+	
 
 	// Weapon is now on my team
 	pWeapon->ChangeTeam( GetTeamNumber() );
@@ -2253,6 +2259,22 @@ CBaseCombatWeapon *CBaseCombatCharacter::Weapon_GetSlot( int slot ) const
 	}
 	
 	return NULL;
+}
+
+int CBaseCombatCharacter::Weapon_GetLastPositionInSlot(int slot)
+{
+	int maxpos = 0;
+	for (int i = 0; i < MAX_WEAPONS; i++)
+	{
+		if (m_hMyWeapons[i].Get() != NULL)
+		{
+			if (m_hMyWeapons[i]->GetSlot() == slot && m_hMyWeapons[i]->GetActualPosition() >= maxpos)
+			{
+				maxpos = m_hMyWeapons[i]->GetActualPosition()+1;
+			}
+		}
+	}
+	return maxpos;
 }
 
 //-----------------------------------------------------------------------------
@@ -3106,7 +3128,7 @@ void CBaseCombatCharacter::VPhysicsShadowCollision( int index, gamevcollisioneve
 	float flOtherAttackerTime = 0.0f;
 
 #if defined( HL2_DLL ) && !defined( HL2MP )
-	if ( HL2GameRules()->MegaPhyscannonActive() == true )
+	if ( HL2MPRules()->MegaPhyscannonActive() == true )
 	{
 		flOtherAttackerTime = 1.0f;
 	}

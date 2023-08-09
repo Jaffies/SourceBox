@@ -115,6 +115,7 @@ $Project "client"
 	"game\client\client_hl2mp.vpc"		[($WIN32||$POSIX) && $HL2MP]
 	"game\client\client_hl1.vpc"		[($WIN32||$POSIX) && $HL1]
 	"game\client\client_hl1mp.vpc"		[($WIN32||$POSIX) && $HL1MP]
+	"game\client\client_sourcebox.vpc"	[($WIN32||$POSIX) && $SOURCEBOX]
 }
 
 $Project "gamepadui"
@@ -440,6 +441,7 @@ $Project "server"
 	"game\server\server_hl2mp.vpc"		[($WIN32||$POSIX) && $HL2MP]
 	"game\server\server_hl1.vpc"		[($WIN32||$POSIX) && $HL1]
 	"game\server\server_hl1mp.vpc"		[($WIN32||$POSIX) && $HL1MP]
+	"game\server\server_sourcebox.vpc"	[($WIN32||$POSIX) && $SOURCEBOX]
 }
 
 $Project "simdtest"

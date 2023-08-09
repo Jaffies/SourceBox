@@ -44,6 +44,10 @@ projects={
         'game/gamepadui',
         'utils/lzma',
         'utils/vbsp',
+        'utils/vrad',
+        'utils/vrad_launcher',
+        'utils/vvis',
+        'utils/vvis_launcher',
 		'gameui',
 		'inputsystem',
 		'ivp/havana',
@@ -60,6 +64,7 @@ projects={
 		'materialsystem/stdshaders',
 		'mathlib',
 		'particles',
+        'raytrace',
 		'scenefilecache',
 		'serverbrowser',
 		'soundemittersystem',
@@ -82,6 +87,7 @@ projects={
 		'utils/vtex',
 		'unicode',
 		'video',
+		#'vscript'
 	],
 	'gamepadui':[
 		'game/gamepadui'

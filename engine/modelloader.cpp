@@ -1156,6 +1156,7 @@ void Mod_LoadWorldlights( CMapLoadHelper &lh, bool bIsHDR )
 			lh.GetMap()->numworldlights = lh.LumpSize() / sizeof( dworldlight_t );
 			lh.GetMap()->worldlights = (dworldlight_t *)Hunk_AllocName( lh.LumpSize(), va( "%s [%s]", lh.GetLoadName(), "worldlights" ) );
 			memcpy( lh.GetMap()->worldlights, lh.LumpBase(), lh.LumpSize() );
+			
 			break;
 		}
 
@@ -2586,6 +2587,7 @@ void Mod_LoadLeafs( void )
 	cleaf_t *pCLeaf = GetCollisionBSPData()->map_leafs.Base();
 	for ( int i = 0; i < pMap->numleafs; i++ )
 	{
+		//Msg("%i: %x\n", i, &pCLeaf[i].dispCount);
 		pMap->leafs[i].dispCount = pCLeaf[i].dispCount;
 		pMap->leafs[i].dispListStart = pCLeaf[i].dispListStart;
 	}

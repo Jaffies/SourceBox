@@ -99,6 +99,8 @@ extern ConVar sv_sendtables;
 
 CGameServer	sv;
 
+CUtlVector<char*> CGameServer::m_BannedCommands;
+
 CGlobalVars g_ServerGlobalVariables( false );
 
 static int	current_skill;
@@ -817,6 +819,7 @@ static ModDirPermissions_t g_ModDirPermissions[] =
 	{ GetAppSteamAppId( k_App_HL2_EP1 ),    GetAppModName( k_App_HL2_EP1 ) },
 	{ GetAppSteamAppId( k_App_HL2_EP2 ),    GetAppModName( k_App_HL2_EP2 ) },
 	{ GetAppSteamAppId( k_App_TF2 ),        GetAppModName( k_App_TF2 ) },
+	{ GetAppSteamAppId( k_App_SOURCEBOX ),	GetAppModName( k_App_SOURCEBOX ) },
 };
 
 bool ServerDLL_Load( bool bIsServerOnly )
@@ -1945,6 +1948,83 @@ void CGameServer::SetMaxClients( int number )
 	deathmatch.SetValue( m_nMaxclients > 1 );
 }
 
+bool MatchesPattern(const char* pszSource, const char* pszPattern)
+{
+	bool	bExact = true;
+	while (1)
+	{
+		if ((*pszPattern) == 0)
+		{
+			return ((*pszSource) == 0);
+		}
+
+		if ((*pszPattern) == '*')
+		{
+			pszPattern++;
+
+			if ((*pszPattern) == 0)
+			{
+				return true;
+			}
+
+			bExact = false;
+			continue;
+		}
+
+		int nLength = 0;
+
+		while ((*pszPattern) != '*' && (*pszPattern) != 0)
+		{
+			nLength++;
+			pszPattern++;
+		}
+
+		while (1)
+		{
+			const char* pszStartPattern = pszPattern - nLength;
+			const char* pszSearch = pszSource;
+
+			for (int i = 0; i < nLength; i++, pszSearch++, pszStartPattern++)
+			{
+				if ((*pszSearch) == 0)
+				{
+					return false;
+				}
+
+				if ((*pszSearch) != (*pszStartPattern))
+				{
+					break;
+				}
+			}
+
+			if (pszSearch - pszSource == nLength)
+			{
+				break;
+			}
+
+			if (bExact == true)
+			{
+				return false;
+			}
+
+			pszSource++;
+		}
+
+		pszSource += nLength;
+	}
+	
+}
+
+bool CGameServer::FilterCommand(const char* cmd)
+{
+	for (int i = 0; i < m_BannedCommands.Count(); i++)
+	{
+		if (MatchesPattern(cmd, m_BannedCommands[i]))
+			return false;
+	}
+	return true;
+}
+
 //-----------------------------------------------------------------------------
 // A potential optimization of the client data sending; the optimization
 // is based around the fact that we think that we're spending all our time in
@@ -2151,13 +2231,29 @@ void SV_InitGameServerSteam()
 		}
 	}
 }
+void SV_RefreshBannedCommands()
+{
+	sv.m_BannedCommands.PurgeAndDeleteElementsArray();
+	CUtlBuffer buf;
+	if (g_pFullFileSystem->ReadFile("cfg/bannedcommands.txt", 0, buf))
+	{
+		buf.PutChar(0);
+		const char* sep[2] = { "\n","\r\n" };
+		V_SplitString2((char*)buf.Base(), sep, 2, sv.m_BannedCommands);
+	}
+}
 
+CON_COMMAND(mp_refreshbannedcommands, "Refresh the banned commands list")
+{
+	SV_RefreshBannedCommands();
+}
 //-----------------------------------------------------------------------------
 // Purpose:
 // Input  : runPhysics -
 //-----------------------------------------------------------------------------
 bool SV_ActivateServer()
 {
+	SV_RefreshBannedCommands();
 	COM_TimestampedLog( "SV_ActivateServer" );
 #ifndef SWDS
 	EngineVGui()->UpdateProgressBar(PROGRESS_ACTIVATESERVER);

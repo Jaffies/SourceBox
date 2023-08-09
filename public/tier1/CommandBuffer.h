@@ -34,6 +34,11 @@ enum
 	COMMAND_BUFFER_INVALID_COMMAND_HANDLE = 0
 };
 
+struct CommandOutput_t
+{
+	char* text;
+	bool done;
+};
 
 //-----------------------------------------------------------------------------
 // A command buffer class- a queue of argc/argv based commands associated
@@ -88,6 +93,10 @@ public:
 
 	int m_nOutputBuffer;
 
+	void PrintCommandBuffer();
+	void ClearCommandBuffer();
+	void FindClear();
+
 private:
 	enum
 	{
@@ -128,6 +137,8 @@ private:
 
 	// Parses argv0 out of the buffer
 	bool ParseArgV0( CUtlBuffer &buf, char *pArgv0, int nMaxLen, const char **pArgs );
+
+	bool m_bClearBuffer;
 
 	char	m_pArgSBuffer[ ARGS_BUFFER_LENGTH ];
 	int		m_nArgSBufferSize;
@@ -175,7 +186,7 @@ inline const CCommand& CCommandBuffer::GetCommand() const
 	return m_CurrentCommand;
 }
 
-
+//extern CUtlMap<int, Command_output> s_convar_capture;
 extern char s_convar_capture[64][8192];
 extern int s_current_capture;
 extern bool s_free_captures[64];

@@ -84,6 +84,7 @@ $Project
 		$File	"replay/replaycamera.h"
 		$File	"replay/cdll_replay.cpp"
 		$File	"replay/cdll_replay.h"
+	
 		
 		$File	"replay/gamedefs.h"	[$BUILD_REPLAY]
 		$File	"replay/gamedefs.cpp"	[$BUILD_REPLAY]
@@ -103,7 +104,7 @@ $Project
 		
 		$File	"$SRCDIR\game\shared\replay_gamestats_shared.cpp"	[$BUILD_REPLAY]
 		$File	"$SRCDIR\game\shared\replay_gamestats_shared.h"	[$BUILD_REPLAY]
-		
+		{
 			$Configuration
 			{
 				$Compiler
@@ -1249,6 +1250,7 @@ $Project
 		$Lib		tier3
 		$Lib		vgui_controls
 		$Lib		vtf
+		$Lib	vscript [$VSCRIPT]
 		$ImpLib		steam_api
 		
 		$Lib $LIBCOMMON/libcrypto [$POSIX]

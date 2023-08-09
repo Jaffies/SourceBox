@@ -59,6 +59,7 @@ public: // IServer implementation
 	void	Clear( void );
 	void	Shutdown( void );
 	void	SetMaxClients(int number);
+	bool	FilterCommand(const char* cmd);
 
 public: 
 	void	InitMaxClients( void );
@@ -76,6 +77,7 @@ public:
 	CPureServerWhitelist * GetPureServerWhitelist() const;
 	
 	inline  CGameClient *Client( int i ) { return static_cast<CGameClient*>(m_Clients[i]); };
+
 
 protected :
 
@@ -151,7 +153,7 @@ public:
 
 	bool		IsHibernating() const;
 	void		UpdateHibernationState();
-
+	static CUtlVector<char*> m_BannedCommands;
 private:
 	void		SetHibernating( bool bHibernating );
 
@@ -169,6 +171,7 @@ private:
 
 	CPureServerWhitelist *m_pPureServerWhitelist;
 	bool m_bHibernating; 	// Are we hibernating.  Hibernation makes server process consume approx 0 CPU when no clients are connected
+	
 };
 
 //============================================================================

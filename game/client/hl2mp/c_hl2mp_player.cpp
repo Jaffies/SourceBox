@@ -48,11 +48,14 @@ IMPLEMENT_CLIENTCLASS_DT(C_HL2MP_Player, DT_HL2MP_Player, CHL2MP_Player)
 	RecvPropInt( RECVINFO( m_iSpawnInterpCounter ) ),
 	RecvPropInt( RECVINFO( m_iPlayerSoundType) ),
 
-	RecvPropBool( RECVINFO( m_fIsWalking ) ),
+	RecvPropBool(RECVINFO(m_bHeldObjectOnOppositeSideOfPortal)),
+	RecvPropEHandle(RECVINFO(m_pHeldObjectPortal)),
+	RecvPropBool(RECVINFO(m_bPitchReorientation)),
+	RecvPropEHandle(RECVINFO(m_hPortalEnvironment)),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA( C_HL2MP_Player )
-	DEFINE_PRED_FIELD( m_fIsWalking, FIELD_BOOLEAN, FTYPEDESC_INSENDTABLE ),
+	DEFINE_PRED_FIELD( m_hPortalEnvironment, FIELD_EHANDLE, FTYPEDESC_INSENDTABLE ),
 END_PREDICTION_DATA()
 
 
@@ -205,6 +208,8 @@ void C_HL2MP_Player::Initialize( void )
 	GetPoseParameterRange( m_headPitchPoseParam, m_headPitchMin, m_headPitchMax );
 
 	CStudioHdr *hdr = GetModelPtr();
+	if (!hdr)
+		return;
 	for ( int i = 0; i < hdr->GetNumPoseParameters() ; i++ )
 	{
 		SetPoseParameter( hdr, i, 0.0 );
@@ -1496,7 +1501,11 @@ void C_HL2MP_Player::PlayerPortalled(C_Prop_Portal* pEnteredPortal)
 
 bool LocalPlayerIsCloseToPortal(void)
 {
-	return C_HL2MP_Player::GetLocalHL2MPPlayer()->IsCloseToPortal();
+	if (C_HL2MP_Player::GetLocalHL2MPPlayer())
+	{
+		return C_HL2MP_Player::GetLocalHL2MPPlayer()->IsCloseToPortal();
+	}
+	return false;
 }
 
 

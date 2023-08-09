@@ -63,18 +63,18 @@ void FinishClientPutInServer( CHL2MP_Player *pPlayer )
 		ClientPrint( pPlayer, HUD_PRINTTALK, "You are on team %s1\n", pPlayer->GetTeam()->GetName() );
 	}
 
-	const ConVar *hostname = cvar->FindVar( "hostname" );
-	const char *title = (hostname) ? hostname->GetString() : "MESSAGE OF THE DAY";
+	//const ConVar *hostname = cvar->FindVar( "hostname" );
+	//const char *title = (hostname) ? hostname->GetString() : "MESSAGE OF THE DAY";
 
-	KeyValues *data = new KeyValues("data");
-	data->SetString( "title", title );		// info panel title
-	data->SetString( "type", "1" );			// show userdata from stringtable entry
-	data->SetString( "msg",	"motd" );		// use this stringtable entry
-	data->SetBool( "unload", sv_motd_unload_on_dismissal.GetBool() );
+	//KeyValues *data = new KeyValues("data");
+	//data->SetString( "title", title );		// info panel title
+	//data->SetString( "type", "1" );			// show userdata from stringtable entry
+	//data->SetString( "msg",	"motd" );		// use this stringtable entry
+	//data->SetBool( "unload", sv_motd_unload_on_dismissal.GetBool() );
 
-	pPlayer->ShowViewPortPanel( PANEL_INFO, true, data );
+	//pPlayer->ShowViewPortPanel( PANEL_INFO, true, data );
 
-	data->deleteThis();
+	//data->deleteThis();
 }
 
 /*
@@ -84,11 +84,16 @@ ClientPutInServer
 called each time a player is spawned into the game
 ============
 */
-void ClientPutInServer( edict_t *pEdict, const char *playername )
+void ClientPutInServer(edict_t* pEdict, const char* playername)
 {
+
 	// Allocate a CBaseTFPlayer for pev, and call spawn
-	CHL2MP_Player *pPlayer = CHL2MP_Player::CreatePlayer( "player", pEdict );
-	pPlayer->SetPlayerName( playername );
+	CHL2MP_Player* pPlayer = dynamic_cast<CHL2MP_Player*>(pEdict->GetUnknown());
+	if (!pPlayer) {
+		pPlayer = CHL2MP_Player::CreatePlayer("player", pEdict);
+	}
+	pPlayer->SetPlayerName(playername);
+
 }
 
 
@@ -99,6 +104,12 @@ void ClientActive( edict_t *pEdict, bool bLoadGame )
 
 	CHL2MP_Player *pPlayer = ToHL2MPPlayer( CBaseEntity::Instance( pEdict ) );
 	FinishClientPutInServer( pPlayer );
+}
+
+void RestorePlayer(edict_t* pEdict, IRestore &pRestore) 
+{
+	CHL2MP_Player* pPlayer = ToHL2MPPlayer(CBaseEntity::Instance(pEdict));
+	pPlayer->Restore(pRestore);
 }
 
 

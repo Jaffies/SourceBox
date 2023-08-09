@@ -69,7 +69,12 @@ IMPLEMENT_SERVERCLASS_ST(CHL2MP_Player, DT_HL2MP_Player)
 	SendPropEHandle( SENDINFO( m_hRagdoll ) ),
 	SendPropInt( SENDINFO( m_iSpawnInterpCounter), 4 ),
 	SendPropInt( SENDINFO( m_iPlayerSoundType), 3 ),
-	
+
+	SendPropBool(SENDINFO(m_bHeldObjectOnOppositeSideOfPortal)),
+	SendPropEHandle(SENDINFO(m_pHeldObjectPortal)),
+	SendPropBool(SENDINFO(m_bPitchReorientation)),
+	SendPropEHandle(SENDINFO(m_hPortalEnvironment)),
+
 	SendPropExclude( "DT_BaseAnimating", "m_flPoseParameter" ),
 	SendPropExclude( "DT_BaseFlex", "m_viewtarget" ),
 
@@ -484,7 +489,8 @@ void CHL2MP_Player::Spawn(void)
 
 		RemoveEffects( EF_NODRAW );
 		
-		GiveDefaultItems();
+		if(gpGlobals->eLoadType != MapLoad_Transition || !gpGlobals->startspot)
+			GiveDefaultItems();
 	}
 
 	SetNumAnimOverlays( 3 );

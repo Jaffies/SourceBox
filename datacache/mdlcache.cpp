@@ -1611,10 +1611,20 @@ void CMDLCache::ConvertFlexData( studiohdr_t *pStudioHdr )
 			for ( int k = 0; k < pModel->nummeshes; k++ )
 			{
 				mstudiomesh_t *pMesh = pModel->pMesh( k );
+				//Msg("")
 				for ( int l = 0; l < pMesh->numflexes; l++ )
 				{
 					mstudioflex_t *pFlex = pMesh->pFlex( l );
 					bool bIsWrinkleAnim = ( pFlex->vertanimtype == STUDIO_VERT_ANIM_WRINKLE );
+					/*Msg("flexdesc: %i\n", pFlex->flexdesc);
+					Msg("flexpair: %i\n", pFlex->flexpair);
+					Msg("numverts: %i\n", pFlex->numverts);
+					Msg("target0: %f\n", pFlex->target0);
+					Msg("target1: %f\n", pFlex->target1);
+					Msg("target2: %f\n", pFlex->target2);
+					Msg("target3: %f\n", pFlex->target3);
+					Msg("vertanimtype: %u\n", pFlex->vertanimtype);
+					Msg("vertindex: %i\n", pFlex->vertindex);*/
 					for ( int m = 0; m < pFlex->numverts; m++ )
 					{
 						mstudiovertanim_t *pVAnim = bIsWrinkleAnim ?
@@ -1959,7 +1969,11 @@ bool CMDLCache::ReadFileNative( char *pFileName, const char *pPath, CUtlBuffer &
 		if( bOk && type == MDLCACHE_STUDIOHDR )
 		{
 			studiohdr_t* pStudioHdr = ( studiohdr_t* ) buf.PeekGet();
-
+			if (!pStudioHdr)
+			{
+				Warning("Something terrible went wrong when loading model '%s'\n", pFileName);
+				return false;
+			}
 			if ( pStudioHdr->studiohdr2index == 0 )
 			{
 				// We always need this now, so make room for it in the buffer now.

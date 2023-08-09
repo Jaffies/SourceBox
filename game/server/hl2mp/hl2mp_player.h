@@ -250,6 +250,9 @@ public:
 	DECLARE_SERVERCLASS();
 	DECLARE_DATADESC();
 
+	virtual void InputKill(void) { return; }
+	virtual void InputKillHierarchy(void) { return; }
+
 	virtual void Precache( void );
 	virtual void Spawn( void );
 	virtual void PostThink( void );

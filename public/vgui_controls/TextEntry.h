@@ -229,6 +229,7 @@ public:
 	void SetSelectionUnfocusedBgColor( const Color& clr );
 
 	void SetUseFallbackFont( bool bState, HFont hFallback );
+	virtual void CursorToPixelSpace(int cursorPos, int &cx, int &cy);
 
 protected:
 	virtual void ResetCursorBlink();
@@ -244,7 +245,6 @@ protected:
 	virtual const char *GetDescription( void );
 	virtual void FireActionSignal();
 	virtual bool GetSelectedRange(int& cx0,int& cx1);
-	virtual void CursorToPixelSpace(int cursorPos, int &cx, int &cy);
 	virtual int  PixelToCursorSpace(int cx, int cy);
 	virtual void AddAnotherLine(int &cx, int &cy);
 	virtual int  GetYStart(); // works out ypixel position drawing started at
@@ -279,6 +279,8 @@ public:
 	// helper accessors for common gets
 	virtual float GetValueAsFloat();
 	virtual int GetValueAsInt();
+	// get index in buffer of the Start of the current line we are on
+	int GetCurrentLineStart();
 
 protected:
     void ScrollRight(); // scroll to right until cursor is visible
@@ -295,8 +297,6 @@ protected:
 
 private:
 	MESSAGE_FUNC_INT( OnSetState, "SetState", state );
-	// get index in buffer of the Start of the current line we are on
-	int GetCurrentLineStart();
 	// get index in buffer of the end of the current line we are on
 	int GetCurrentLineEnd();
 	bool IsLineBreak(int index);
@@ -307,6 +307,7 @@ private:
 
 public:
 	Menu *GetEditMenu(); // retrieve copy/cut/paste menu
+	DECLARE_GET_SET( int, _cursorPos, CursorPos )
 
 private:
 	void	FlipToLastIME();
@@ -315,13 +316,15 @@ public:
 	virtual void GetTextRange( wchar_t *buf, int from, int numchars );	// copy a portion of the text to the buffer and add zero-termination
 	virtual void GetTextRange( char *buf, int from, int numchars );	// copy a portion of the text to the buffer and add zero-termination
 	CUtlVector<wchar_t> m_TextStream;		// the text in the text window is stored in this buffer
+	int                _select[2];	// select[1] is the offset in the text to where the cursor is currently
+									// select[0] is the offset to where the cursor was dragged to. or -1 if no drag.
+	int                _cursorPos;		// the position in the text buffer of the blinking cursor
 
 private:
 
 	CUtlVector<wchar_t> m_UndoTextStream;	// a copy of the text buffer to revert changes
 	CUtlVector<int>		m_LineBreaks;		// an array that holds the index in the buffer to wrap lines at
 
-	int                _cursorPos;		// the position in the text buffer of the blinking cursor
 	bool               _cursorIsAtEnd;
 	bool               _putCursorAtEnd;
 	int				   _undoCursorPos;	// a copy of the cursor position to revert changes
@@ -333,8 +336,6 @@ private:
 	int				   _mouseSelectCursorStart;	// where mouse button was pressed down in text window
 	long               _cursorNextBlinkTime;  // time of next cursor blink
 	int                _cursorBlinkRate;	  // speed of cursor blinking
-	int                _select[2];	// select[1] is the offset in the text to where the cursor is currently
-									// select[0] is the offset to where the cursor was dragged to. or -1 if no drag.
 	int				   _pixelsIndent;
 	int				   _charCount;
 	int				   _maxCharCount;  // max number of chars that can be in the text buffer

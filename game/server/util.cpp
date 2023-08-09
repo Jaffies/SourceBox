@@ -1148,6 +1148,29 @@ void UTIL_SayTextFilter( IRecipientFilter& filter, const char *pText, CBasePlaye
 	MessageEnd();
 }
 
+void UTIL_CommandPrint(CBasePlayer* pPlayer, const char* fmt, ...)
+{
+	if (pPlayer)
+	{
+		va_list args;
+		va_start(args, fmt);
+		char formatted[8192];
+		//sprintf(formatted, fmt, args);
+		int val = _vsntprintf(formatted, 8192, fmt, args);
+		if (val == -1)
+			return;
+		va_end(args);
+		ClientPrint(pPlayer, HUD_PRINTCONSOLE, formatted);
+	}
+	else
+	{
+		va_list args;
+		va_start(args, fmt);
+		Msg(fmt,args);
+		va_end(args);
+	}
+}
+
 void UTIL_SayText2Filter( IRecipientFilter& filter, CBasePlayer *pEntity, bool bChat, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4 )
 {
 	UserMessageBegin( filter, "SayText2" );
