@@ -20,11 +20,7 @@
 #include "materialsystem/materialsystem_config.h"
 
 #if defined( USE_SDL )
-    #ifdef __linux__
-        #include "SDL2/SDL.h" //for fuck sake it does only work like that :/
-    #else
-        #include "SDL.h"
-    #endif
+#include "SDL.h"
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!

@@ -16,8 +16,8 @@
 #include "iviewrender.h"
 #include "view_shared.h"
 #include "viewrender.h"
-#include "../../shared/portal/PortalSimulation.h"
-#include "portal/C_PortalGhostRenderable.h" 
+#include "PortalSimulation.h"
+#include "C_PortalGhostRenderable.h" 
 
 struct dlight_t;
 class C_DynamicLight;

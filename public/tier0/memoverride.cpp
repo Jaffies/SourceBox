@@ -901,7 +901,12 @@ void InvalidParameterViolation()
 // makes reading the call stack easier.
 void __cdecl WriteMiniDumpOrBreak( int dummy, const char *pchName )
 {
-	if ( !Plat_IsInDebugSession() )
+	if ( Plat_IsInDebugSession() )
+	{
+		__debugbreak();
+		// Continue at your peril...
+	}
+	else
 	{
 		WriteMiniDump( pchName );
 		// Call Plat_ExitProcess so we don't continue in a bad state. 

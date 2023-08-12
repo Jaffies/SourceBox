@@ -42,12 +42,6 @@ projects={
 		'game/client',
 		'game/server',
         'game/gamepadui',
-        'utils/lzma',
-        'utils/vbsp',
-        'utils/vrad',
-        'utils/vrad_launcher',
-        'utils/vvis',
-        'utils/vvis_launcher',
 		'gameui',
 		'inputsystem',
 		'ivp/havana',
@@ -88,9 +82,6 @@ projects={
 		'unicode',
 		'video',
 		#'vscript'
-	],
-	'gamepadui':[
-		'game/gamepadui'
 	],
 	'tests': [
 		'appframework',
@@ -169,7 +160,6 @@ def get_taskgen_count(self):
 
 def define_platform(conf):
 	conf.env.DEDICATED = conf.options.DEDICATED
-	conf.env.GAMEPADUI = conf.options.GAMEPADUI
 	conf.env.TESTS = conf.options.TESTS
 	conf.env.TOGLES = conf.options.TOGLES
 	conf.env.GL = conf.options.GL and not conf.options.TESTS and not conf.options.DEDICATED
@@ -269,9 +259,6 @@ def options(opt):
 
 	grp.add_option('-d', '--dedicated', action = 'store_true', dest = 'DEDICATED', default = False,
 		help = 'build dedicated server [default: %default]')
-
-	grp.add_option('-G', '--gamepadui', action = 'store_true', dest = 'GAMEPADUI', default = False,
-		help = 'build gamepadui (for testing if fucking sdl2 works, which for fuck sake doesn\'t work) [default: %default]')
 
 	grp.add_option('--tests', action = 'store_true', dest = 'TESTS', default = False,
 		help = 'build unit tests [default: %default]')
@@ -444,6 +431,7 @@ def configure(conf):
 	if conf.env.DEST_OS == 'win32':
 		projects['game'] += ['utils/bzip2']
 		projects['dedicated'] += ['utils/bzip2']
+		projects['game'] += ['utils/lzma','utils/vbsp','utils/vrad','utils/vrad_launcher','utils/vvis','utils/vvis_launcher']
 	if conf.options.OPUS or conf.env.DEST_OS == 'android':
 		projects['game'] += ['engine/voice_codecs/opus']
 
@@ -589,9 +577,13 @@ def configure(conf):
 
 	# indicate if we are packaging for Linux/BSD
 	if conf.env.DEST_OS != 'android':
-		conf.env.LIBDIR = conf.env.PREFIX+'/bin/'
+		if conf.options.DEDICATED:
+			conf.env.LIBDIR = conf.env.PREFIX+'/bin'+'_'+conf.env.DEST_OS+'_srcds/'
+		else:
+			conf.env.LIBDIR = conf.env.PREFIX+'/bin'+'_'+conf.env.DEST_OS+'/'
 		conf.env.TESTDIR = conf.env.PREFIX+'/tests/'
 		conf.env.BINDIR = conf.env.PREFIX
+		
 	else:
 		conf.env.LIBDIR = conf.env.BINDIR = conf.env.PREFIX
 
@@ -603,8 +595,6 @@ def configure(conf):
 		conf.add_subproject(projects['tests'])
 	elif conf.options.DEDICATED:
 		conf.add_subproject(projects['dedicated'])
-	elif conf.options.GAMEPADUI:
-		conf.add_subproject(projects['gamepadui'])
 	else:
 		conf.add_subproject(projects['game'])
 
@@ -622,6 +612,7 @@ def build(bld):
 
 	if bld.env.OPUS or bld.env.DEST_OS == 'android':
 		projects['game'] += ['engine/voice_codecs/opus']
+    
 
 	if bld.env.TESTS:
 		bld.add_subproject(projects['tests'])

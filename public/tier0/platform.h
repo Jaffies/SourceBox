@@ -276,6 +276,12 @@ typedef signed char int8;
 #else
 	#define IsAndroid()	false
 #endif
+
+#ifndef _WIN32
+#define itoa(value,str,len) Q_snprintf( str, len, "%d", value )
+#define itow(value,str,len) V_snwprintf( str, len, "%d", value )
+#define _itow(value,str,len) V_snwprintf( str, len, "%d", value )
+#endif
 // From steam/steamtypes.h
 // RTime32
 // We use this 32 bit time representing real world time.
@@ -1415,6 +1421,22 @@ PLATFORM_INTERFACE void Plat_DebugString( const char * );
 #warning "Plat_IsInDebugSession isn't working properly"
 inline bool Plat_IsInDebugSession( bool bForceRecheck = false ) { return false; }
 #define Plat_DebugString(s) ((void)0)
+#endif
+
+#if defined(_WIN32) 
+	#define DEST_OS_BASE "win32"
+#elif defined(PLATFORM_BSD)
+	#define DEST_OS_BASE "freebsd"
+#elif defined(LINUX)
+	#define DEST_OS_BASE "linux"
+#else
+	#define DEST_OS_BASE ""
+#endif
+
+#if defined(DEDICATED)
+	#define DEST_OS DEST_OS_BASE "_srcds"
+#else
+	#define DEST_OS DEST_OS_BASE
 #endif
 
 //-----------------------------------------------------------------------------

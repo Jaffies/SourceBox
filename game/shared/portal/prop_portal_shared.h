@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#ifdef C_PROP_PORTAL_H
+
 #ifndef PROP_PORTAL_SHARED_H
 #define PROP_PORTAL_SHARED_H
 
@@ -15,9 +15,9 @@
 #include "cbase.h"
 
 #ifdef CLIENT_DLL
-#include "../../client/portal/c_prop_portal.h"
+#include "c_prop_portal.h"
 #else
-#include "../../server/portal/prop_portal.h"
+#include "prop_portal.h"
 #endif
 
 // CProp_Portal enum for the portal corners (if a user wants a specific corner)
@@ -45,5 +45,5 @@ public:
 
 
 
-#endif
+
 #endif //#ifndef PROP_PORTAL_SHARED_H

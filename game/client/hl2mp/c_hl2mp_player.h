@@ -12,15 +12,15 @@
 class C_HL2MP_Player;
 class C_WeaponHL2MPBase;
 #include "c_basehlplayer.h"
-#include "../../shared/hl2mp/hl2mp_player_shared.h"
+#include "hl2mp_player_shared.h"
 #include "beamdraw.h"
-#include "portal/c_prop_portal.h"
-#include "portal/c_func_liquidportal.h"
-#include "../../shared/cstrike/cs_shareddefs.h"
-#include "../../shared/hl2mp/weapon_hl2mpbase.h"
-#include "../../shared/baseparticleentity.h"
-#include "../../shared/cstrike/cs_weapon_parse.h"
-#include "../../shared/cstrike/cs_playeranimstate.h"
+#include "c_prop_portal.h"
+#include "c_func_liquidportal.h"
+#include "cs_shareddefs.h"
+#include "weapon_hl2mpbase.h"
+#include "baseparticleentity.h"
+#include "cs_weapon_parse.h"
+#include "cs_playeranimstate.h"
 
 
 

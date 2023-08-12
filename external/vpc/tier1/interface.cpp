@@ -450,12 +450,19 @@ CSysModule *Sys_LoadModule( const char *pModuleName )
 		if ( strstr( pModuleName, "bin/") == pModuleName || ( szCwd[ cCwd - 1 ] == 'n'  && szCwd[ cCwd - 2 ] == 'i' && szCwd[ cCwd - 3 ] == 'b' )  )
 		{
 			// don't make bin/bin path
-			V_snprintf( szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/%s", szCwd, pModuleName );
+			char szTemp[1024];
+			V_snprintf( szTemp, sizeof(szTemp), "%s/%s", szCwd, pModuleName );
+			int place = (int)(strstr(szTemp,"bin/")-szTemp);
+			strncpy(szAbsoluteModuleName,szTemp,place);
+			szAbsoluteModuleName[place] = '\0';
+			strcat(szAbsoluteModuleName,"bin_" DEST_OS "/");
+			strcat(szAbsoluteModuleName,szTemp+place+5);
 		}
 		else
 		{
-			V_snprintf( szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/bin/%s", szCwd, pModuleName );
+			V_snprintf( szAbsoluteModuleName, sizeof(szAbsoluteModuleName), "%s/bin_%s/%s", szCwd, DEST_OS, pModuleName );
 		}
+
 		hDLL = Sys_LoadLibrary( szAbsoluteModuleName );
 #endif // _PS3
 	}

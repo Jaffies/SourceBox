@@ -668,7 +668,7 @@ int CCommand::ParseBrackets(char* output, int& index, int i, bool inconvar, bool
 				if (cvar)
 				{
 					char str[32] = { 0 };
-					sprintf(str, "%d", cvar->GetInt());
+					itoa(cvar->GetInt(), str, 10);
 					strcat(output, str);
 					addedchars += strlen(str);
 				}

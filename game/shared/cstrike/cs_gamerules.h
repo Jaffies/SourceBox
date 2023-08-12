@@ -21,11 +21,11 @@
 #include "gamevars_shared.h"
 
 #ifdef CLIENT_DLL
-	#include "../../client/hl2mp/c_hl2mp_player.h"
+	#include "c_hl2mp_player.h"
 	#include "networkstringtable_clientdll.h"
 #else
-	#include "../../server/hl2mp/hl2mp_player.h"
-	#include "../../server/cstrike/funfactmgr_cs.h"
+	#include "hl2mp_player.h"
+	#include "funfactmgr_cs.h"
 #endif
 
 #include "cs_urlretrieveprices.h"
